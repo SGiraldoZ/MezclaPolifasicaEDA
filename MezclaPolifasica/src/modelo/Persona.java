@@ -30,12 +30,7 @@ public class Persona implements Comparable<Persona>, Serializable{
 		comp = this.nombre.compareTo(p.getNombre());
 		if (comp!=0) return comp;
 		return this.edad-p.getEdad();
-	}
-	
-	public void metodoBasura() {
-		//BuenasTardes
-	}
-	
+	}	
 	
 	public String getNombre() {
 		return nombre;

@@ -1,20 +1,24 @@
 package modelo;
 
-public class Persona implements Comparable<Persona>{
+import java.io.Serializable;
+
+public class Persona implements Comparable<Persona>, Serializable{
 	private String nombre;
 	private int edad;
+	private String cedula;
 	
 	
 	
-	public Persona(String nombre, int edad) {
+	public Persona(String nombre, int edad, String cedula) {
 		this.nombre = nombre;
 		this.edad = edad;
+		this.cedula = cedula;
 	}
 	
 	
 	@Override
 	public String toString() {
-		return this.nombre+" - "+edad;	
+		return this.cedula + ";"+this.nombre+";"+edad;	
 	}
 	
 	@Override

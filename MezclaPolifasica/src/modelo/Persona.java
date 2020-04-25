@@ -8,6 +8,9 @@ public class Persona implements Comparable<Persona>, Serializable{
 	private String cedula;
 	
 	
+	public String getCedula() {
+		return this.cedula;
+	}
 	
 	public Persona(String nombre, int edad, String cedula) {
 		this.nombre = nombre;
@@ -22,24 +25,37 @@ public class Persona implements Comparable<Persona>, Serializable{
 	
 	@Override
 	public int compareTo(Persona p){
-		int compNombres = this.nombre.compareTo(p.getNombre());
-		/*if (compNombres != 0)*/ return compNombres;
-		//return this.edad-p.getEdad();
+		int comp = this.cedula.compareTo(p.getCedula());
+		if (comp != 0) return comp;
+		comp = this.nombre.compareTo(p.getNombre());
+		if (comp!=0) return comp;
+		return this.edad-p.getEdad();
 	}
+	
+	public void metodoBasura() {
+		//BuenasTardes
+	}
+	
 	
 	public String getNombre() {
 		return nombre;
 	}
+
 	public void setNombre(String nombre) {
 		this.nombre = nombre;
 	}
+
 	public int getEdad() {
 		return edad;
 	}
+
 	public void setEdad(int edad) {
 		this.edad = edad;
 	}
 	
-	//probando 1,2,3...
-	//probando2
+
+	public static void main(String[] args) {
+	}
+
+
 }

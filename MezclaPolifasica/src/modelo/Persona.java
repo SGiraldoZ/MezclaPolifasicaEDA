@@ -14,8 +14,7 @@ public class Persona implements Comparable<Persona>, Serializable{
 		this.edad = edad;
 		this.cedula = cedula;
 	}
-	
-	
+		
 	@Override
 	public String toString() {
 		return this.cedula + ";"+this.nombre+";"+edad;	
@@ -42,5 +41,5 @@ public class Persona implements Comparable<Persona>, Serializable{
 	}
 	
 	//probando 1,2,3...
-
+	//probando2
 }

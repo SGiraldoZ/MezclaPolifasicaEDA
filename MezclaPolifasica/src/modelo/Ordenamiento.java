@@ -17,20 +17,16 @@ public class Ordenamiento {
 		(new File(aux1)).createNewFile();
 		(new File(aux2)).createNewFile();
 
-		FileReader frMain = new FileReader(url), frAux1 = new FileReader(Ordenamiento.aux1),
-				frAux2 = new FileReader(aux2);
-		FileWriter fwAux1 = new FileWriter(Ordenamiento.aux1), fwAux2 = new FileWriter(aux2),
-				fwMain = new FileWriter(url);
-		BufferedReader brMain = new BufferedReader(frMain), brAux1 = new BufferedReader(frAux1),
-				brAux2 = new BufferedReader(frAux2);
-		BufferedWriter bwMain = new BufferedWriter(fwMain), bwAux1 = new BufferedWriter(fwAux1),
-				bwAux2 = new BufferedWriter(fwAux2);
+		FileReader frMain, frAux1, frAux2;
+		FileWriter fwAux1, fwAux2, fwMain;
+		BufferedReader brMain, brAux1, brAux2;
+		BufferedWriter bwMain, bwAux1, bwAux2;
 
 		int tot = 0;
 		int div = 0;
 		int lenSecuencia = 1;
 		int eDivid; // Numeros de elementos asignados en una fase de división
-		int numMezclados,nM1, nM2;
+		int numMezclados, nM1, nM2;
 		boolean aux1 = true;
 		String line, line1, line2;
 		do {
@@ -45,26 +41,30 @@ public class Ordenamiento {
 			// Se hace la division numero div
 			while ((line = brMain.readLine()) != null) {
 				if (aux1) {
-					bwAux1.write(line);
+					bwAux1.write(line+"\n");
 				} else {
-					bwAux2.write(line);
+					bwAux2.write(line+"\n");
 				}
 				eDivid++;
 				aux1 = (eDivid % lenSecuencia == 0) ? !aux1 : aux1;
-				if (div == 0)
+				if (div == 0) {
 					tot++;
+				}
+
 			}
+			System.out.println(tot);
 			div++;
-			frMain.close();
 			brMain.close();
-			fwAux1.close();
-			fwAux2.close();
+			frMain.close();
 			bwAux1.close();
 			bwAux2.close();
+			fwAux1.close();
+			fwAux2.close();
+			
 
 			// FASE MEZCLA
 
-			lenSecuencia = (int) Math.pow(2, div);
+			
 			numMezclados = 0;
 			frAux1 = new FileReader(Ordenamiento.aux1);
 			frAux2 = new FileReader(aux2);
@@ -74,23 +74,37 @@ public class Ordenamiento {
 			bwMain = new BufferedWriter(fwMain);
 			line1 = brAux1.readLine();
 			line2 = brAux2.readLine();
-			nM1 = 0;
-			nM2 = 0;
+			
 			while (numMezclados < tot) {
-				while (nM1 + nM2 < lenSecuencia) {
-					if (line1.compareTo(line2) < 0 && nM1 < lenSecuencia / 2) {
-						bwMain.write(line1);
-						line1 = brAux1.readLine();
-						nM1++;
-					} else if(nM2 < lenSecuencia/2){
-						bwMain.write(line2);
+				nM1 = 0;
+				nM2 = 0;
+				while ((nM1 < lenSecuencia || nM2 < lenSecuencia)&&!((line1==null||line1.isBlank())&&(line2==null||line2.isBlank()))) {
+					if ((nM1 >= lenSecuencia || line1==null ||line1.isBlank())) {//&&(line2!=null&&!line2.isBlank())) {
+						bwMain.write(line2 + "\n");
 						line2 = brAux2.readLine();
 						nM2++;
+						numMezclados++;
+					} else if ((nM2 >= lenSecuencia || line2==null||line2.isBlank())){//&&(line1!=null&&!line1.isBlank())) {
+						bwMain.write(line1 + "\n");
+						line1 = brAux1.readLine();
+						nM1++;
+						numMezclados++;
+					} else if (Integer.parseInt(line1)<Integer.parseInt(line2)) {
+						bwMain.write(line1+"\n");
+						line1 = brAux1.readLine();
+						nM1++;
+						numMezclados++;
+					} else {
+						bwMain.write(line2+"\n");
+						line2 = brAux2.readLine();
+						nM2++;
+						numMezclados++;
 					}
 				}
+				
 				bwMain.flush();
 			}
-
+			lenSecuencia = (int) Math.pow(2, div);
 			frAux1.close();
 			frAux2.close();
 			fwMain.close();
@@ -98,7 +112,7 @@ public class Ordenamiento {
 			brAux2.close();
 			bwMain.close();
 
-		} while (Math.pow(2, div) < tot);
+		} while (lenSecuencia < tot);
 
 	}
 

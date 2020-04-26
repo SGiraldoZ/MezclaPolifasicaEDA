@@ -16,7 +16,7 @@ public class FicherosTexto {
 		FileWriter fw = new FileWriter(f);
 		BufferedWriter bw = new BufferedWriter(fw);
 		Random r = new Random();
-		for (int i = 0; i < 10;i++) {
+		for (int i = 0; i < 20;i++) {
 			bw.write(r.nextInt(100) + "\n");
 			
 		}
@@ -25,12 +25,14 @@ public class FicherosTexto {
 	}
 	
 	public static void main(String[] args) {
-		// TODO Auto-generated method stub
+	//	 TODO Auto-generated method stub
 		try{
 			fillIntsTxt("Enteros.txt");
 		}catch(IOException e) {
 			System.out.println(e.getLocalizedMessage());
 		}
+		
+	
 	}
 
 }

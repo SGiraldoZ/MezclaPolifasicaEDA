@@ -22,7 +22,7 @@ public class Ordenamiento {
 		BufferedReader brMain, brAux1, brAux2;
 		BufferedWriter bwMain, bwAux1, bwAux2;
 
-		int tot = 0;
+		int tot;
 		int div = 0;
 		int lenSecuencia = 1;
 		int eDivid; // Numeros de elementos asignados en una fase de división
@@ -38,21 +38,20 @@ public class Ordenamiento {
 			bwAux2 = new BufferedWriter(fwAux2);
 
 			eDivid = 0;
+			tot = 0;
 			// Se hace la division numero div
 			while ((line = brMain.readLine()) != null) {
-				if (aux1) {
-					bwAux1.write(line+"\n");
-				} else {
-					bwAux2.write(line+"\n");
+				if(!line.isBlank()) {
+					if (aux1) {
+						bwAux1.write(line+"\n");
+					} else {
+						bwAux2.write(line+"\n");
+					}
+					eDivid++;
+					aux1 = (eDivid % lenSecuencia == 0) ? !aux1 : aux1;	
+					tot++;	
 				}
-				eDivid++;
-				aux1 = (eDivid % lenSecuencia == 0) ? !aux1 : aux1;
-				if (div == 0) {
-					tot++;
-				}
-
 			}
-			System.out.println(tot);
 			div++;
 			brMain.close();
 			frMain.close();
@@ -79,12 +78,12 @@ public class Ordenamiento {
 				nM1 = 0;
 				nM2 = 0;
 				while ((nM1 < lenSecuencia || nM2 < lenSecuencia)&&!((line1==null||line1.isBlank())&&(line2==null||line2.isBlank()))) {
-					if ((nM1 >= lenSecuencia || line1==null ||line1.isBlank())) {//&&(line2!=null&&!line2.isBlank())) {
+					if ((nM1 >= lenSecuencia || line1==null ||line1.isBlank())) {
 						bwMain.write(line2 + "\n");
 						line2 = brAux2.readLine();
 						nM2++;
 						numMezclados++;
-					} else if ((nM2 >= lenSecuencia || line2==null||line2.isBlank())){//&&(line1!=null&&!line1.isBlank())) {
+					} else if ((nM2 >= lenSecuencia || line2==null||line2.isBlank())){
 						bwMain.write(line1 + "\n");
 						line1 = brAux1.readLine();
 						nM1++;
@@ -118,7 +117,7 @@ public class Ordenamiento {
 
 	public static void main(String[] args) {
 		try {
-			sortIntsTxt0("naturales.txt");
+			sortIntsTxt0("Enteros.txt");
 		} catch (IOException e) {
 			System.out.print(e.getMessage());
 		}

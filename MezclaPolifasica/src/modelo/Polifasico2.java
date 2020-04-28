@@ -8,6 +8,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Arrays;
 
+import manejoFicheros.FicherosTexto;
+
 public class Polifasico2 {
 
 	private static String auxiliares = "aux%s.txt";
@@ -157,7 +159,34 @@ public class Polifasico2 {
 	}
 
 	public static void main(String[] args) {
-		// TODO Auto-generated method stub
+		String url = "Enteros.txt";
+		Polifasico2 p = new Polifasico2();
+		FicherosTexto f= new FicherosTexto();
+		
+		try {
+		f.fillIntsTxt(url, 3, 20);
+		int cant=0;
+		cant=p.cantidadDeTramos(url);
+		System.out.println("Cantidad de tramos: "+cant);
+		long secuenciasPorCinta[]=p.secuenciasPorCinta(cant);
+		int sum=0, cantSecNulas=0;
+		System.out.print("Reparticion de los tramos en los archivos: ");
+		for (int i=0; i<secuenciasPorCinta.length; i++) {
+			System.out.print(secuenciasPorCinta[i]+" ");
+			sum+=secuenciasPorCinta[i];
+		}
+		System.out.println();
+		cantSecNulas=sum-cant;
+		System.out.println("La cantidad de secuencias nulas es: "+cantSecNulas);
+		
+		p.division(url, secuenciasPorCinta, cant);
+		
+		}
+		
+		catch (IOException e) {
+			e.getMessage();
+		}
+		
 
 	}
 

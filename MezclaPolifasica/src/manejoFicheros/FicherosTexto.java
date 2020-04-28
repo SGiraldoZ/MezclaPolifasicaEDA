@@ -13,14 +13,14 @@ import java.util.Random;
 
 public class FicherosTexto {
 
-	public static void fillIntsTxt(String url) throws IOException{
+	public static void fillIntsTxt(String url, int digitos, int N) throws IOException{
 		File f  = new File(url);
 		f.createNewFile();
 		FileWriter fw = new FileWriter(f);
 		BufferedWriter bw = new BufferedWriter(fw);
 		Random r = new Random();
-		for (int i = 0; i < 20;i++) {
-			bw.write(r.nextInt(100) + "\n");
+		for (int i = 0; i < N;i++) {
+			bw.write(r.nextInt((int)Math.pow(10, digitos)) + "\n");
 			
 		}
 		bw.close();
@@ -42,7 +42,7 @@ public class FicherosTexto {
 	//	 TODO Auto-generated method stub
 		String[] a = {};
 		try{
-			fillIntsTxt("Enteros.txt");
+			fillIntsTxt("Enteros.txt",2,100000);
 			a = leerFichero("Enteros.txt");
 		}catch(IOException e) {
 			System.out.println(e.getLocalizedMessage());

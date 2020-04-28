@@ -144,7 +144,7 @@ public class Polifasico {
 		}
 	}
 
-	public int cantidadDeTramosYNulos(String url) throws IOException {
+	public static int cantidadDeTramosYNulos(String url) throws IOException {
 		String line;
 		int lastRead = 0, read;
 		FileReader frMain = new FileReader(url);

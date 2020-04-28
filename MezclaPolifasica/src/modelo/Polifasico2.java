@@ -16,6 +16,41 @@ public class Polifasico2 {
 	private static String auxiliares = "aux%s.txt";
 	private static String tempFile = "auxBorrar.txt";
 
+	public static void mezclaPolifasica(String url) throws IOException {
+		int cantTramos = cantidadDeTramos(url);
+		long[] distribucionInicial = secuenciasPorCinta((int) cantTramos);
+		division(url, distribucionInicial, cantTramos);
+		String ordenado = mezclaHastaVacio(distribucionInicial);
+		File f = new File(ordenado), f1 = new File(url);
+		f1.delete();
+		f.renameTo(f1);
+		File fAll = new File("");
+		for (File d : fAll.listFiles()) {
+			if (d.getPath().contains("aux")) {
+				d.delete();
+			}
+		}
+	}
+
+	public static void asegurarSubSecuencias(long[] secCintas) throws IOException {
+		long tramosCinta, tramosCintaR;
+		FileWriter fw;
+		BufferedWriter bw;
+		for (int i = 0; i < secCintas.length; i++) {
+			String aux = String.format(auxiliares, i);
+			fw = new FileWriter(aux, true);
+			bw = new BufferedWriter(fw);
+			tramosCinta = secCintas[i];
+			tramosCintaR = Polifasico.cantidadDeTramosYNulos(aux);
+			while (tramosCintaR < tramosCinta) {
+				bw.write("@\n");
+				tramosCintaR++;
+			}
+			bw.close();
+			fw.close();
+		}
+	}
+
 	public static void division(String url, long[] secuenciasCintas, int cantTramos) throws IOException {
 		FileReader fr = new FileReader(url);
 		BufferedReader br = new BufferedReader(fr);
@@ -78,15 +113,18 @@ public class Polifasico2 {
 		for (FileWriter b : fw) {
 			b.close();
 		}
+
+		asegurarSubSecuencias(secuenciasCintas);
 	}
 
 	public static String mezclaHastaVacio(long[] secuenciasCintas) throws IOException, FileNotFoundException {
-		
+		System.out.print("Empezo otra fase de mezcla con secuencias: ");
 		int totSecuencias = 0;
 		for (long l : secuenciasCintas) {
 			totSecuencias += l;
+			System.out.print(l+" ");
 		}
-		
+		System.out.println();
 		if (totSecuencias == 1) {
 			int k = 0;
 			while (secuenciasCintas[k] == 0)
@@ -104,7 +142,7 @@ public class Polifasico2 {
 			if (secuenciasCintas[i] == 0) {
 				fw = new FileWriter(String.format(auxiliares, i));
 				bw = new BufferedWriter(fw);
-			}else if (secuenciasCintas[i] > 0) {
+			} else if (secuenciasCintas[i] > 0) {
 				f[numBr] = new File(String.format(auxiliares, i));
 				fr[numBr] = new FileReader(f[numBr]);
 				br[numBr] = new BufferedReader(fr[numBr]);
@@ -125,6 +163,7 @@ public class Polifasico2 {
 		}
 		while (!finMezcla) {
 			Arrays.fill(wereChecking, true);
+			mezclandoTramos = true;
 			while (mezclandoTramos) {
 				// Iniciar dos variables necesarias para la comparacion
 				soloVacios = true;
@@ -138,20 +177,26 @@ public class Polifasico2 {
 					if (wereChecking[j]) {
 						soloVacios = soloVacios && firstOfSecuence[j].trim().equals("@");
 						if (firstOfSecuence[j].trim().compareTo("@") == 0) {
+
 							firstOfSecuence[j] = br[j].readLine();
+
+							if (firstOfSecuence[j] == null)
+								finMezcla = true;
 							wereChecking[j] = false;
 						} else if (Integer.parseInt(firstOfSecuence[j]) < Integer.parseInt(firstOfSecuence[minActual])) {
 							minActual = j;
 						}
 					}
 				}
-				
+
 				if (soloVacios)
 					bw.write("@\n");
 				else {
 					temp = Integer.parseInt(firstOfSecuence[minActual]);
 					bw.write(temp + "\n");
+
 					firstOfSecuence[minActual] = br[minActual].readLine();
+
 					if (firstOfSecuence[minActual] == null) {
 						finMezcla = true;
 						wereChecking[minActual] = false;
@@ -170,8 +215,9 @@ public class Polifasico2 {
 				}
 			}
 			numTramosMezclados++;
+
 		}
-	
+
 		bw.close();
 		fw.close();
 
@@ -184,7 +230,8 @@ public class Polifasico2 {
 			if (firstOfSecuence[i] != null) {
 				fw.write(firstOfSecuence[i] + "\n");
 				while ((line = br[i].readLine()) != null) {
-					fw.write(line + "\n");
+					if (!line.isBlank())
+						fw.write(line + "\n");
 				}
 			}
 			String fileName = f[i].getPath();
@@ -198,13 +245,14 @@ public class Polifasico2 {
 		}
 
 //		SiguientePasoMezcla
-		for (int l = 0; l < secuenciasCintas.length;l++) {
-			if (secuenciasCintas[l] == 0)
-				secuenciasCintas[l] = numTramosMezclados;
+		for (int t = 0; t < secuenciasCintas.length; t++) {
+			if (secuenciasCintas[t] == 0)
+				secuenciasCintas[t] = numTramosMezclados;
 			else
-				secuenciasCintas[l] -= numTramosMezclados;
+				secuenciasCintas[t] -= numTramosMezclados;
 
 		}
+		asegurarSubSecuencias(secuenciasCintas);
 		return mezclaHastaVacio(secuenciasCintas);
 
 	}
@@ -297,26 +345,27 @@ public class Polifasico2 {
 		String url = "Enteros.txt";
 
 		try {
-			FicherosTexto.fillIntsTxt(url, 3, 10);
-			int cant = 0;
-			cant = cantidadDeTramos(url);
-			System.out.println("Cantidad de tramos: " + cant);
-			long secuenciasPorCinta[] = secuenciasPorCinta(cant);
-			int sum = 0, cantSecNulas = 0;
-			System.out.print("Reparticion de los tramos en los archivos: ");
-			for (int i = 0; i < secuenciasPorCinta.length; i++) {
-				System.out.print(secuenciasPorCinta[i] + " ");
-				sum += secuenciasPorCinta[i];
-			}
-			System.out.println();
 
-			division(url, secuenciasPorCinta, cant);
-
-			System.out.println(mezclaHastaVacio(secuenciasPorCinta));
-//		System.out.println();
-//		cantSecNulas=sum-cant;
-//		System.out.println("La cantidad de secuencias nulas es: "+cantSecNulas);
-
+//			FicherosTexto.fillIntsTxt(url, 2, 15);
+//			int cant = 0;
+//			cant = cantidadDeTramos(url);
+//			System.out.println("Cantidad de tramos: " + cant);
+//			long secuenciasPorCinta[] = secuenciasPorCinta(cant);
+//			int sum = 0, cantSecNulas = 0;
+//			System.out.print("Reparticion de los tramos en los archivos: ");
+//			for (int i = 0; i < secuenciasPorCinta.length; i++) {
+//				System.out.print(secuenciasPorCinta[i] + " ");
+//				sum += secuenciasPorCinta[i];
+//			}
+//			System.out.println();
+//
+//			division(url, secuenciasPorCinta, cant);
+//
+//			System.out.println(mezclaHastaVacio(secuenciasPorCinta));
+//			System.out.println();
+//			cantSecNulas = sum - cant;
+//			System.out.println("La cantidad de secuencias nulas es: " + cantSecNulas);
+			mezclaHastaVacio(new long[] {2,0,3});
 		}
 
 		catch (IOException e) {

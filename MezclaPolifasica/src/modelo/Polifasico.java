@@ -2,6 +2,7 @@ package modelo;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -11,21 +12,81 @@ import java.util.Arrays;
 import manejoFicheros.FicherosTexto;
 
 public class Polifasico {
-	
-	public void division(String url, long[] subCadenas) {
+	private static String auxiliares = "aux%s.txt";
+
+	public void division(String url, long[] secuenciasCintas, int cantTramos) throws IOException {
+		FileReader fr = new FileReader(url);
+		BufferedReader br = new BufferedReader(fr);
+		int m = secuenciasCintas.length +1; //Números de archivos con los que se va a trabajar
+		long totSecuencias = 0;
+		for(long l: secuenciasCintas) {
+			totSecuencias+=l;
+		}
+		long secuenciasNulas = totSecuencias - cantTramos;
 		
+		File[] f = new File[m];
+		FileWriter[] fw = new FileWriter[m];
+		BufferedWriter[] bw = new BufferedWriter[m];
+		for (int i = 0; i < m; i++) {
+			f[i] = new File(String.format(auxiliares, (i)));
+			f[i].createNewFile();
+			fw[i] = new FileWriter(f[i]);
+			bw[i] = new BufferedWriter(fw[i]);
+		}
+
+		// Variables necesarias para la mezcla:
+		long[] secuCinta = new long[secuenciasCintas.length];
+		Arrays.fill(secuCinta, 0);
+		String line = br.readLine();
+		int last;
+		int i = 0;
+		bw[i].write(line + "\n");
+		last = Integer.parseInt(line);
+		while ((line = br.readLine()) != null) {
+			if (!line.isBlank()) {
+				if (Integer.parseInt(line) < last) {
+					secuCinta[i]++;
+					if (secuenciasNulas > 0 && secuCinta[i]<secuenciasCintas[i]) {
+						bw[i].write("@\n");
+						secuCinta[i]++;
+						secuenciasNulas--;
+					}
+					do {
+						i = (i + 1) % (m-1);
+					} while (secuCinta[i] == secuenciasCintas[i]);
+					bw[i].write(line + "\n");
+				} else {
+					bw[i].write(line + "\n");
+				}
+				last = Integer.parseInt(line);
+			}
+		}
+		while (secuenciasNulas > 0) {
+			do {
+				i = (i + 1) % (m-1);
+			} while (secuCinta[i] == secuenciasCintas[i]);
+			bw[i].write("@\n");
+			secuenciasNulas--;
+			secuCinta[i]++;
+		}
+
+		for (BufferedWriter b : bw) {
+			b.close();
+		}
+		for (FileWriter b : fw) {
+			b.close();
+		}
 	}
 
-	
 	public int cantidadDeTramos(String url) throws IOException {
 		String line;
-		int lastRead=0, read;
+		int lastRead = 0, read;
 		FileReader frMain = new FileReader(url);
 		BufferedReader brMain = new BufferedReader(frMain);
 		int cont = 0;
-		while((line=brMain.readLine())!=null){
-			if(!line.isBlank()) {	
-				if((read=Integer.parseInt(line))<lastRead || cont == 0) {
+		while ((line = brMain.readLine()) != null) {
+			if (!line.isBlank()) {
+				if ((read = Integer.parseInt(line)) < lastRead || cont == 0) {
 					cont++;
 				}
 				lastRead = read;
@@ -83,10 +144,33 @@ public class Polifasico {
 		}
 	}
 
-	public long[] fibonacciOptimo(String url) throws IOException {
+	public int cantidadDeTramosYNulos(String url) throws IOException {
+		String line;
+		int lastRead = 0, read;
+		FileReader frMain = new FileReader(url);
+		BufferedReader brMain = new BufferedReader(frMain);
+		int cont = 0;
+		while ((line = brMain.readLine()) != null) {
+			if (!line.isBlank()) {
+				if (line.trim().compareTo("@")==0) {
+					cont++;
+				}else if ((read = Integer.parseInt(line)) < lastRead || cont == 0) {
+					cont++;
+					lastRead = read;
+				}else lastRead = read;
+				
+			}
+		}
+
+		frMain.close();
+		brMain.close();
+
+		return cont;
+	}
+	
+	public long[] fibonacciOptimo(int cantidadDeTramos) throws IOException {
 		long[] aux2, aux3, aux4, aux5, aux6, aux7, auxReturn;
 		long k2, k3, k4, k5, k6, k7;
-		int cantidadDeTramos = this.cantidadDeTramos(url);
 
 		aux2 = FibonacciMejorado(cantidadDeTramos, 2);
 		k2 = aux2[aux2.length - 1] - cantidadDeTramos;
@@ -128,16 +212,19 @@ public class Polifasico {
 	public static void main(String[] args) {
 		String url = "Enteros.txt";
 		Polifasico obj = new Polifasico();
-	//	FicherosTexto.main(null);
+//		FicherosTexto.main(null);
 		try {
-			System.out.println("Numero Tramos: "+obj.cantidadDeTramos(url)+"\n");
-			long[] k = obj.fibonacciOptimo(url);
-			System.out.println("K: " + (k.length-1));
-			for (int i = 0; i < k.length; i++)
-				System.out.println(k[i]);
+			System.out.println("Numero Tramos: " + obj.cantidadDeTramos(url) + "\n");
+
+			obj.division(url, new long[]{2,3,1}, obj.cantidadDeTramos(url));
+			
+			System.out.println("cant tramos 0: "+obj.cantidadDeTramosYNulos("aux0.txt")+
+					"\nCant tramos 1: "+obj.cantidadDeTramosYNulos("aux1.txt")+
+					"\nCant tramos 2: "+obj.cantidadDeTramosYNulos("aux2.txt"));
 		} catch (IOException e) {
 			e.getMessage();
 		}
+
 	}
 
 }

@@ -21,7 +21,16 @@ public class Polifasico2 {
 		long[] distribucionInicial = secuenciasPorCinta((int) cantTramos);
 		division(url, distribucionInicial, cantTramos);
 		String ordenado = mezclaHastaVacio(distribucionInicial);
-		File f = new File(ordenado), f1 = new File(url);
+		File f = null, f1 = new File(url);
+		for (int i = 0; i<distribucionInicial.length; i++) {
+			String s = String.format(auxiliares, i);
+			if (s.compareTo(ordenado)==0) {
+				f = new File(s);
+			}
+			else {
+				new File(s).delete();
+			}
+		}
 		f1.delete();
 		f.renameTo(f1);
 		

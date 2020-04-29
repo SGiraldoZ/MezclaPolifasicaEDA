@@ -336,11 +336,11 @@ public class Polifasico2 {
 	}
 
 	public static void main(String[] args) {
-		String url = "Enteros.txt";
+		String url = "../Enteros.txt";
 
 		try {
 
-			FicherosTexto.fillIntsTxt(url, 6, 20000);
+			FicherosTexto.fillIntsTxt(url, 7, 200000);
 			
 //			int cant = 0;
 //			cant = cantidadDeTramos(url);
@@ -363,7 +363,7 @@ public class Polifasico2 {
 			mezclaPolifasica(url);
 			
 		}
-
+		
 		catch (IOException e) {
 			e.getMessage();
 		}

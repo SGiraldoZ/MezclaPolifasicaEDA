@@ -24,12 +24,7 @@ public class Polifasico2 {
 		File f = new File(ordenado), f1 = new File(url);
 		f1.delete();
 		f.renameTo(f1);
-		File fAll = new File("");
-		for (File d : fAll.listFiles()) {
-			if (d.getPath().contains("aux")) {
-				d.delete();
-			}
-		}
+		
 	}
 
 	public static void asegurarSubSecuencias(long[] secCintas) throws IOException {
@@ -345,27 +340,27 @@ public class Polifasico2 {
 
 		try {
 
-			FicherosTexto.fillIntsTxt(url, 3, 200);
+			FicherosTexto.fillIntsTxt(url, 6, 20000);
 			
-			int cant = 0;
-			cant = cantidadDeTramos(url);
-			System.out.println("Cantidad de tramos: " + cant);
-			long secuenciasPorCinta[] = secuenciasPorCinta(cant);
-			int sum = 0, cantSecNulas = 0;
-			System.out.print("Reparticion de los tramos en los archivos: ");
-			for (int i = 0; i < secuenciasPorCinta.length; i++) {
-				System.out.print(secuenciasPorCinta[i] + " ");
-				sum += secuenciasPorCinta[i];
-			}
-			System.out.println();
-
-			division(url, secuenciasPorCinta, cant);
-
-			System.out.println(mezclaHastaVacio(secuenciasPorCinta));
-			System.out.println();
-			cantSecNulas = sum - cant;
-			System.out.println("La cantidad de secuencias nulas es: " + cantSecNulas);
-			
+//			int cant = 0;
+//			cant = cantidadDeTramos(url);
+//			System.out.println("Cantidad de tramos: " + cant);
+//			long secuenciasPorCinta[] = secuenciasPorCinta(cant);
+//			int sum = 0, cantSecNulas = 0;
+//			System.out.print("Reparticion de los tramos en los archivos: ");
+//			for (int i = 0; i < secuenciasPorCinta.length; i++) {
+//				System.out.print(secuenciasPorCinta[i] + " ");
+//				sum += secuenciasPorCinta[i];
+//			}
+//			System.out.println();
+//
+//			division(url, secuenciasPorCinta, cant);
+//
+//			System.out.println(mezclaHastaVacio(secuenciasPorCinta));
+//			System.out.println();
+//			cantSecNulas = sum - cant;
+//			System.out.println("La cantidad de secuencias nulas es: " + cantSecNulas);
+			mezclaPolifasica(url);
 			
 		}
 

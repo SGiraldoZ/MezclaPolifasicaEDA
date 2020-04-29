@@ -168,7 +168,7 @@ public class Polifasico2 {
 				// Iniciar dos variables necesarias para la comparacion
 				soloVacios = true;
 				int q = 0;
-				while (!wereChecking[q])
+				while (q<firstOfSecuence.length&&(!wereChecking[q]||firstOfSecuence[q]==null||firstOfSecuence[q].contentEquals("@")))
 					q++;
 				minActual = q;
 
@@ -177,13 +177,11 @@ public class Polifasico2 {
 					if (wereChecking[j]) {
 						soloVacios = soloVacios && firstOfSecuence[j].trim().equals("@");
 						if (firstOfSecuence[j].trim().compareTo("@") == 0) {
-
 							firstOfSecuence[j] = br[j].readLine();
-
 							if (firstOfSecuence[j] == null)
 								finMezcla = true;
 							wereChecking[j] = false;
-						} else if (Integer.parseInt(firstOfSecuence[j]) < Integer.parseInt(firstOfSecuence[minActual])) {
+						} else if (minActual<firstOfSecuence.length&&Integer.parseInt(firstOfSecuence[j]) < Integer.parseInt(firstOfSecuence[minActual])) {
 							minActual = j;
 						}
 					}
@@ -201,8 +199,7 @@ public class Polifasico2 {
 						finMezcla = true;
 						wereChecking[minActual] = false;
 
-					} else if (firstOfSecuence[minActual].trim().equals("@")
-							|| Integer.parseInt(firstOfSecuence[minActual]) < temp) {
+					} else if (firstOfSecuence[minActual].equals("@")|| Integer.parseInt(firstOfSecuence[minActual]) < temp) {
 						wereChecking[minActual] = false;
 					}
 				}
@@ -243,14 +240,16 @@ public class Polifasico2 {
 			f1.renameTo(new File(fileName));
 
 		}
+		long min = secuenciasCintas[0];
+		for (long l: secuenciasCintas) {
+			if(min==0||l>0&&l<min) {
+				min = l;
+			}
+		}
 
 //		SiguientePasoMezcla
 		for (int t = 0; t < secuenciasCintas.length; t++) {
-			if (secuenciasCintas[t] == 0)
-				secuenciasCintas[t] = numTramosMezclados;
-			else
-				secuenciasCintas[t] -= numTramosMezclados;
-
+				secuenciasCintas[t] = Math.abs(secuenciasCintas[t]-min);
 		}
 		asegurarSubSecuencias(secuenciasCintas);
 		return mezclaHastaVacio(secuenciasCintas);
@@ -346,26 +345,28 @@ public class Polifasico2 {
 
 		try {
 
-//			FicherosTexto.fillIntsTxt(url, 2, 15);
-//			int cant = 0;
-//			cant = cantidadDeTramos(url);
-//			System.out.println("Cantidad de tramos: " + cant);
-//			long secuenciasPorCinta[] = secuenciasPorCinta(cant);
-//			int sum = 0, cantSecNulas = 0;
-//			System.out.print("Reparticion de los tramos en los archivos: ");
-//			for (int i = 0; i < secuenciasPorCinta.length; i++) {
-//				System.out.print(secuenciasPorCinta[i] + " ");
-//				sum += secuenciasPorCinta[i];
-//			}
-//			System.out.println();
-//
-//			division(url, secuenciasPorCinta, cant);
-//
-//			System.out.println(mezclaHastaVacio(secuenciasPorCinta));
-//			System.out.println();
-//			cantSecNulas = sum - cant;
-//			System.out.println("La cantidad de secuencias nulas es: " + cantSecNulas);
-			mezclaHastaVacio(new long[] {2,0,3});
+			FicherosTexto.fillIntsTxt(url, 3, 200);
+			
+			int cant = 0;
+			cant = cantidadDeTramos(url);
+			System.out.println("Cantidad de tramos: " + cant);
+			long secuenciasPorCinta[] = secuenciasPorCinta(cant);
+			int sum = 0, cantSecNulas = 0;
+			System.out.print("Reparticion de los tramos en los archivos: ");
+			for (int i = 0; i < secuenciasPorCinta.length; i++) {
+				System.out.print(secuenciasPorCinta[i] + " ");
+				sum += secuenciasPorCinta[i];
+			}
+			System.out.println();
+
+			division(url, secuenciasPorCinta, cant);
+
+			System.out.println(mezclaHastaVacio(secuenciasPorCinta));
+			System.out.println();
+			cantSecNulas = sum - cant;
+			System.out.println("La cantidad de secuencias nulas es: " + cantSecNulas);
+			
+			
 		}
 
 		catch (IOException e) {

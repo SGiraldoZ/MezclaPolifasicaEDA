@@ -20,7 +20,7 @@ public class Polifasico2 {
 		int cantTramos = cantidadDeTramos(url);
 		long[] distribucionInicial = secuenciasPorCinta((int) cantTramos);
 		divisionGarantizandoTramos(url, distribucionInicial, cantTramos);
-		String ordenado = mezclaHastaVacio(distribucionInicial);
+		String ordenado = mezclaHastaVacio1(distribucionInicial);
 		File f = null, f1 = new File(url);
 		for (int i = 0; i < distribucionInicial.length; i++) {
 			String s = String.format(auxiliares, i);
@@ -394,6 +394,151 @@ public class Polifasico2 {
 			secuenciasCintas[t] = Math.abs(secuenciasCintas[t] - min);
 		}
 		asegurarSubSecuencias(secuenciasCintas);
+		return mezclaHastaVacio(secuenciasCintas);
+
+	}
+
+	//Solo asegura el número de secuencias del archivo destino, porque los otros no deberían haber cambiado
+	public static String mezclaHastaVacio1(long[] secuenciasCintas) throws IOException, FileNotFoundException {
+		System.out.print("Empezo otra fase de mezcla con secuencias: ");
+		int totSecuencias = 0;
+		for (long l : secuenciasCintas) {
+			totSecuencias += l;
+			System.out.print(l + " ");
+		}
+		System.out.println();
+		if (totSecuencias == 1) {
+			int k = 0;
+			while (secuenciasCintas[k] == 0)
+				k++;
+			return String.format(auxiliares, k);
+		}
+
+		FileWriter fw = null;
+		BufferedWriter bw = null;
+		File[] f = new File[secuenciasCintas.length - 1];
+		FileReader[] fr = new FileReader[f.length];
+		BufferedReader[] br = new BufferedReader[fr.length];
+		int numBr = 0;
+		for (int i = 0; i <= br.length; i++) {
+			if (secuenciasCintas[i] == 0) {
+				fw = new FileWriter(String.format(auxiliares, i));
+				bw = new BufferedWriter(fw);
+			} else if (secuenciasCintas[i] > 0) {
+				f[numBr] = new File(String.format(auxiliares, i));
+				fr[numBr] = new FileReader(f[numBr]);
+				br[numBr] = new BufferedReader(fr[numBr]);
+				numBr++;
+			}
+		}
+		boolean[] wereChecking = new boolean[br.length];
+		boolean mezclandoTramos = true;
+		String[] firstOfSecuence = new String[br.length];
+		boolean finMezcla = false;
+		int numTramosMezclados = 0; // Actualmente estamos mezclando un conjunto de tramos (i.e un conjunto de
+									// secuencias sería primero de cada cinta)
+		int minActual = 0;// siguiente elemento en el fichero destino
+		boolean soloVacios;
+		int temp;
+		for (int i = 0; i < br.length; i++) {
+			firstOfSecuence[i] = br[i].readLine();
+		}
+		while (!finMezcla) {
+			Arrays.fill(wereChecking, true);
+			mezclandoTramos = true;
+			while (mezclandoTramos) {
+				// Iniciar dos variables necesarias para la comparacion
+				soloVacios = true;
+				int q = 0;
+				while (q < firstOfSecuence.length
+						&& (!wereChecking[q] || firstOfSecuence[q] == null || firstOfSecuence[q].contentEquals("@")))
+					q++;
+				minActual = q;
+
+				// Este ciclo busca el menor
+				for (int j = 0; j < br.length; j++) {
+					if (wereChecking[j]) {
+						soloVacios = soloVacios && firstOfSecuence[j].trim().equals("@");
+						if (firstOfSecuence[j].trim().compareTo("@") == 0) {
+							firstOfSecuence[j] = br[j].readLine();
+							if (firstOfSecuence[j] == null)
+								finMezcla = true;
+							wereChecking[j] = false;
+						} else if (minActual < firstOfSecuence.length && Integer.parseInt(firstOfSecuence[j]) < Integer
+								.parseInt(firstOfSecuence[minActual])) {
+							minActual = j;
+						}
+					}
+				}
+
+				if (soloVacios)
+					bw.write("@\n");
+				else {
+					temp = Integer.parseInt(firstOfSecuence[minActual]);
+					bw.write(temp + "\n");
+
+					firstOfSecuence[minActual] = br[minActual].readLine();
+
+					if (firstOfSecuence[minActual] == null) {
+						finMezcla = true;
+						wereChecking[minActual] = false;
+
+					} else if (firstOfSecuence[minActual].equals("@")
+							|| Integer.parseInt(firstOfSecuence[minActual]) < temp) {
+						wereChecking[minActual] = false;
+					}
+				}
+
+				// Esta sentencias sirven para determinar si terminé la mezcla de las secuencias
+				// de todas las cintas
+				mezclandoTramos = false;
+				for (boolean b : wereChecking) {
+					mezclandoTramos = mezclandoTramos || b;
+				}
+			}
+			numTramosMezclados++;
+
+		}
+
+		bw.close();
+		fw.close();
+
+		for (int i = 0; i < fr.length; i++) {
+			File f1 = new File(tempFile);
+			f1.createNewFile();
+			fw = new FileWriter(f1);
+			bw = new BufferedWriter(fw);
+			String line;
+			if (firstOfSecuence[i] != null) {
+				fw.write(firstOfSecuence[i] + "\n");
+				while ((line = br[i].readLine()) != null) {
+					if (!line.isBlank())
+						fw.write(line + "\n");
+				}
+			}
+			String fileName = f[i].getPath();
+			fr[i].close();
+			br[i].close();
+			f[i].delete();
+			bw.close();
+			fw.close();
+			f1.renameTo(new File(fileName));
+
+		}
+		long min = secuenciasCintas[0];
+		for (long l : secuenciasCintas) {
+			if (min == 0 || l > 0 && l < min) {
+				min = l;
+			}
+		}
+
+//		SiguientePasoMezcla
+		int d=0;
+		for (int t = 0; t < secuenciasCintas.length; t++) {
+			if (secuenciasCintas[t] == 0)d=t;
+			secuenciasCintas[t] = Math.abs(secuenciasCintas[t] - min);
+		}
+		asegurarSubSecuencias1f(secuenciasCintas[d], d);
 		return mezclaHastaVacio(secuenciasCintas);
 
 	}

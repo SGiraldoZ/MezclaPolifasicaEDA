@@ -13,29 +13,47 @@ import manejoFicheros.FicherosTexto;
 
 public class Polifasico2 {
 
-	private static String auxiliares = "aux%s.txt";
-	private static String tempFile = "auxBorrar.txt";
+	public static String auxiliares = "aux%s.txt";
+	public static String tempFile = "auxBorrar.txt";
 
 	public static void mezclaPolifasica(String url) throws IOException {
 		int cantTramos = cantidadDeTramos(url);
 		long[] distribucionInicial = secuenciasPorCinta((int) cantTramos);
-		division(url, distribucionInicial, cantTramos);
+		divisionGarantizandoTramos(url, distribucionInicial, cantTramos);
 		String ordenado = mezclaHastaVacio(distribucionInicial);
 		File f = null, f1 = new File(url);
-		for (int i = 0; i<distribucionInicial.length; i++) {
+		for (int i = 0; i < distribucionInicial.length; i++) {
 			String s = String.format(auxiliares, i);
-			if (s.compareTo(ordenado)==0) {
+			if (s.compareTo(ordenado) == 0) {
 				f = new File(s);
-			}
-			else {
+			} else {
 				new File(s).delete();
 			}
 		}
 		f1.delete();
 		f.renameTo(f1);
-		
+
 	}
 
+	public static void asegurarSubSecuencias1f(long secuencias, int i) throws IOException {
+		long tramosCinta, tramosCintaR;
+		FileWriter fw;
+		BufferedWriter bw;
+		
+			String aux = String.format(auxiliares, i);
+			fw = new FileWriter(aux, true);
+			bw = new BufferedWriter(fw);
+			tramosCinta = secuencias;
+			tramosCintaR = cantidadDeTramosYNulos(aux);
+			while (tramosCintaR < tramosCinta) {
+				bw.write("@\n");
+				tramosCintaR++;
+			}
+			bw.close();
+			fw.close();
+		
+	}
+	
 	public static void asegurarSubSecuencias(long[] secCintas) throws IOException {
 		long tramosCinta, tramosCintaR;
 		FileWriter fw;
@@ -45,7 +63,7 @@ public class Polifasico2 {
 			fw = new FileWriter(aux, true);
 			bw = new BufferedWriter(fw);
 			tramosCinta = secCintas[i];
-			tramosCintaR = Polifasico.cantidadDeTramosYNulos(aux);
+			tramosCintaR = cantidadDeTramosYNulos(aux);
 			while (tramosCintaR < tramosCinta) {
 				bw.write("@\n");
 				tramosCintaR++;
@@ -121,12 +139,129 @@ public class Polifasico2 {
 		asegurarSubSecuencias(secuenciasCintas);
 	}
 
+	
+	public static int cantidadDeTramosYNulos(String url) throws IOException {
+		String line;
+		String lastRead = "0";
+		FileReader frMain = new FileReader(url);
+		BufferedReader brMain = new BufferedReader(frMain);
+		int cont = 0;
+		while ((line = brMain.readLine()) != null) {
+			if (!line.isBlank()) {
+				if (line.trim().compareTo("@") == 0) {
+					cont++;
+					
+				} else if (lastRead.compareTo("@") == 0 || Integer.parseInt(line) < Integer.parseInt(lastRead)
+						|| cont == 0) {
+					cont++;
+					
+				}
+				lastRead = line;
+
+			}
+		}
+
+		frMain.close();
+		brMain.close();
+
+		return cont;
+	}
+
+	/*
+	 * TODAVIA NO FUNCIONA LA IDEA es que revise si dos tramos coinciden, para
+	 * agregar un @ extra al final
+	 */
+	public static void divisionGarantizandoTramos(String url, long[] secuenciasCintas, int cantTramos)
+			throws IOException {
+		FileReader fr = new FileReader(url);
+		BufferedReader br = new BufferedReader(fr);
+		int m = secuenciasCintas.length; // Números de archivos con los que se va a trabajar
+		long totSecuencias = 0;
+		for (long l : secuenciasCintas) {
+			totSecuencias += l;
+		}
+		long secuenciasNulas = totSecuencias - cantTramos;
+		File[] f = new File[m];
+		FileWriter[] fw = new FileWriter[m];
+		BufferedWriter[] bw = new BufferedWriter[m];
+		for (int i = 0; i < m; i++) {
+			f[i] = new File(String.format(auxiliares, (i)));
+			f[i].createNewFile();
+			fw[i] = new FileWriter(f[i]);
+			bw[i] = new BufferedWriter(fw[i]);
+		}
+
+		// Variables necesarias para la mezcla:
+		long[] secuCinta = new long[secuenciasCintas.length];
+		Arrays.fill(secuCinta, 0);
+		String line = br.readLine();
+		String[] lastWrittenTo = new String[m];
+		Arrays.fill(lastWrittenTo, "@");
+		boolean coincidenciaTramos = false;
+		int last;
+		int i = 0;
+		bw[i].write(line + "\n");
+		lastWrittenTo[i] = line;
+		last = Integer.parseInt(line);
+		while ((line = br.readLine()) != null) {
+			if (!line.isBlank()) {
+				if (Integer.parseInt(line) < last) {
+					secuCinta[i]++;
+					if (coincidenciaTramos) {
+						bw[i].write("@\n");
+						lastWrittenTo[i] ="@";
+						coincidenciaTramos = false;
+					}
+					if (secuenciasNulas > 0 && secuCinta[i] < secuenciasCintas[i]) {
+						bw[i].write("@\n");
+						lastWrittenTo[i] = "@";
+						secuCinta[i]++;
+						secuenciasNulas--;
+					}
+					bw[i].flush();
+					do {
+						i = (i + 1) % (m - 1);
+					} while (secuCinta[i] == secuenciasCintas[i]);
+					coincidenciaTramos = (lastWrittenTo[i].compareTo("@") != 0
+							&& Integer.parseInt(line) >= Integer.parseInt(lastWrittenTo[i]));
+
+					bw[i].write(line + "\n");
+					lastWrittenTo[i] = line;
+				} else {
+					bw[i].write(line + "\n");
+					lastWrittenTo[i] = line;
+				}
+				last = Integer.parseInt(line);
+			}
+		}
+		if (coincidenciaTramos) {
+			bw[i].write("@\n");
+			lastWrittenTo[i] = "@\n";
+		}
+		while (secuenciasNulas > 0) {
+			do {
+				i = (i + 1) % (m - 1);
+			} while (secuCinta[i] == secuenciasCintas[i]);
+			bw[i].write("@\n");
+			secuenciasNulas--;
+			secuCinta[i]++;
+		}
+
+		for (BufferedWriter b : bw) {
+			b.close();
+		}
+		for (FileWriter b : fw) {
+			b.close();
+		}
+
+	}
+
 	public static String mezclaHastaVacio(long[] secuenciasCintas) throws IOException, FileNotFoundException {
 		System.out.print("Empezo otra fase de mezcla con secuencias: ");
 		int totSecuencias = 0;
 		for (long l : secuenciasCintas) {
 			totSecuencias += l;
-			System.out.print(l+" ");
+			System.out.print(l + " ");
 		}
 		System.out.println();
 		if (totSecuencias == 1) {
@@ -172,7 +307,8 @@ public class Polifasico2 {
 				// Iniciar dos variables necesarias para la comparacion
 				soloVacios = true;
 				int q = 0;
-				while (q<firstOfSecuence.length&&(!wereChecking[q]||firstOfSecuence[q]==null||firstOfSecuence[q].contentEquals("@")))
+				while (q < firstOfSecuence.length
+						&& (!wereChecking[q] || firstOfSecuence[q] == null || firstOfSecuence[q].contentEquals("@")))
 					q++;
 				minActual = q;
 
@@ -185,7 +321,8 @@ public class Polifasico2 {
 							if (firstOfSecuence[j] == null)
 								finMezcla = true;
 							wereChecking[j] = false;
-						} else if (minActual<firstOfSecuence.length&&Integer.parseInt(firstOfSecuence[j]) < Integer.parseInt(firstOfSecuence[minActual])) {
+						} else if (minActual < firstOfSecuence.length && Integer.parseInt(firstOfSecuence[j]) < Integer
+								.parseInt(firstOfSecuence[minActual])) {
 							minActual = j;
 						}
 					}
@@ -203,7 +340,8 @@ public class Polifasico2 {
 						finMezcla = true;
 						wereChecking[minActual] = false;
 
-					} else if (firstOfSecuence[minActual].equals("@")|| Integer.parseInt(firstOfSecuence[minActual]) < temp) {
+					} else if (firstOfSecuence[minActual].equals("@")
+							|| Integer.parseInt(firstOfSecuence[minActual]) < temp) {
 						wereChecking[minActual] = false;
 					}
 				}
@@ -245,15 +383,15 @@ public class Polifasico2 {
 
 		}
 		long min = secuenciasCintas[0];
-		for (long l: secuenciasCintas) {
-			if(min==0||l>0&&l<min) {
+		for (long l : secuenciasCintas) {
+			if (min == 0 || l > 0 && l < min) {
 				min = l;
 			}
 		}
 
 //		SiguientePasoMezcla
 		for (int t = 0; t < secuenciasCintas.length; t++) {
-				secuenciasCintas[t] = Math.abs(secuenciasCintas[t]-min);
+			secuenciasCintas[t] = Math.abs(secuenciasCintas[t] - min);
 		}
 		asegurarSubSecuencias(secuenciasCintas);
 		return mezclaHastaVacio(secuenciasCintas);
@@ -345,12 +483,10 @@ public class Polifasico2 {
 	}
 
 	public static void main(String[] args) {
-		String url = "../Enteros.txt";
+		String url = "Enteros.txt";
 
 		try {
-
-			FicherosTexto.fillIntsTxt(url, 7, 200000);
-			
+			FicherosTexto.fillIntsTxt(url, 6, 3000000);
 //			int cant = 0;
 //			cant = cantidadDeTramos(url);
 //			System.out.println("Cantidad de tramos: " + cant);
@@ -370,9 +506,9 @@ public class Polifasico2 {
 //			cantSecNulas = sum - cant;
 //			System.out.println("La cantidad de secuencias nulas es: " + cantSecNulas);
 			mezclaPolifasica(url);
-			
+
 		}
-		
+
 		catch (IOException e) {
 			e.getMessage();
 		}

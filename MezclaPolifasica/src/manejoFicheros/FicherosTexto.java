@@ -42,8 +42,8 @@ public class FicherosTexto {
 	//	 TODO Auto-generated method stub
 		String[] a = {};
 		try{
-			fillIntsTxt("Enteros.txt",2,10);
-			a = leerFichero("Enteros.txt");
+			fillIntsTxt("../Enteros.txt",3,50);
+			//a = leerFichero("Enteros.txt");
 		}catch(IOException e) {
 			System.out.println(e.getLocalizedMessage());
 		}
